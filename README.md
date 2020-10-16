@@ -13,11 +13,11 @@ Use either keyboard - arrows left and right to move weapon and space to shoot, o
 
 ## TODO list
 
-[] Clean up and refactor code
-[] Add TOP 10 scores list - first only with local storage for the same browser, later using remote database
-[] Add different types of falling objects to destroy (not only asteroids), with different parameters (image, falling speed, horizontal movement,...)
-[] Add other falling objects just as a distraction
-[] Add different types of missiles e.g. after reaching certain level. They could be different size and speed.
+[ ] Clean up and refactor code
+[ ] Add TOP 10 scores list - first only with local storage for the same browser, later using remote database
+[ ] Add different types of falling objects to destroy (not only asteroids), with different parameters (image, falling speed, horizontal movement,...)
+[ ] Add other falling objects just as a distraction
+[ ] Add different types of missiles e.g. after reaching certain level. They could be different size and speed.
 
 ## Credits
 
