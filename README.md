@@ -1,8 +1,11 @@
 # Shooting Asteroids Game
 
+Little mini-game written in plain JavaScript, css and html.
+You can play it [here](http://tomas.krivda.eu/asteroids/) or [here](https://krivdat.github.io/shooting-asteroids-game).
+
 ## Brief Description
 
-Little mini-game written in plain JavaScript, css and html developed while improving my coding knowledge. The purpose is to shoot falling asteroids with weapon and prevent them hitting the Earth or the weapon. You can fire max three missiles at a time. After certain number of destroyed asteroids the level increases which means more asteroids and increased speed.
+Developed while improving my coding knowledge. The purpose is to shoot falling asteroids with weapon and prevent them hitting the Earth or the weapon. You can fire max three missiles at a time. After certain number of destroyed asteroids the level increases which means more asteroids and increased speed.
 
 ## Game Controls
 
