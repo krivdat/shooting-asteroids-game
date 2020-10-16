@@ -1,10 +1,16 @@
 const space = document.querySelector(".space");
+let str = window.getComputedStyle(space).width;
+str = str.slice(0, str.length - 2);
+const spaceWidth = Math.round(parseFloat(str, 10));
 const weapon = document.createElement("div");
 const startButton = document.createElement("button");
 const missedDisplay = document.createElement("div");
 const destroyedDisplay = document.createElement("div");
 const levelDisplay = document.createElement("div");
 const gameSummary = document.createElement("div");
+const moveRightIcon = document.createElement("div");
+const moveLeftIcon = document.createElement("div");
+const fireControlIcon = document.createElement("div");
 const topScores = [];
 
 const weaponParams = {
@@ -50,7 +56,7 @@ const levels = {
 };
 
 const maxLevel = Object.keys(levels).length;
-const levelStep = 10; //number of destroyed asteroids to increase level
+const levelStep = 15; //number of destroyed asteroids to increase level
 let level = 1;
 const asteroids = [];
 let asteroidParams = { ...levels[level] };
@@ -191,6 +197,27 @@ function createGameSummary() {
   space.appendChild(gameSummary);
 }
 
+function createTouchControls() {
+  moveLeftIcon.classList.add("move-control", "left");
+  moveRightIcon.classList.add("move-control", "right");
+  fireControlIcon.classList.add("fire-control");
+  moveLeftIcon.setAttribute("id", "move-left");
+  moveRightIcon.setAttribute("id", "move-right");
+  space.appendChild(moveLeftIcon);
+  space.appendChild(moveRightIcon);
+  space.appendChild(fireControlIcon);
+  // add event listeners
+  moveLeftIcon.addEventListener("touchstart", control);
+  moveLeftIcon.addEventListener("mousedown", control);
+  moveLeftIcon.addEventListener("touchend", controlStop);
+  moveLeftIcon.addEventListener("mouseup", controlStop);
+  moveRightIcon.addEventListener("touchstart", control);
+  moveRightIcon.addEventListener("mousedown", control);
+  moveRightIcon.addEventListener("touchend", controlStop);
+  moveRightIcon.addEventListener("mouseup", controlStop);
+  fireControlIcon.addEventListener("touchstart", fire);
+}
+
 function gameSummaryDisplay(onoff) {
   if (onoff === "on") {
     //console.log("displaying game summary");
@@ -242,7 +269,7 @@ function generateNewBullet(xPos, yPos) {
 function initAsteroids() {
   for (let i = 0; i < asteroidsInitCount; i++) {
     const xPos = Math.round(
-      Math.random() * (400 - 20 * 2 - asteroidParams.width) + 20
+      Math.random() * (spaceWidth - 20 * 2 - asteroidParams.width) + 20
     );
     const yPos =
       600 -
@@ -320,7 +347,7 @@ function moveAsteroids() {
       if (gapSinceLast >= asteroidParams.vertGap) {
         //create new asteroid on top
         const xPos = Math.round(
-          Math.random() * (400 - 20 * 2 - asteroidParams.width) + 20
+          Math.random() * (spaceWidth - 20 * 2 - asteroidParams.width) + 20
         );
         const yPos = 600 - 10 - asteroidParams.height;
         generateNewAsteroid(xPos, yPos);
@@ -401,7 +428,7 @@ function moveWeapon(direction) {
   moveWeaponTimer = setInterval(() => {
     if (
       (direction === "left" && weaponParams.xPos <= 5) ||
-      (direction === "right" && weaponParams.xPos >= 355)
+      (direction === "right" && weaponParams.xPos >= spaceWidth - 5)
     ) {
       isWeaponMoving = false;
       clearInterval(moveWeaponTimer);
@@ -413,43 +440,57 @@ function moveWeapon(direction) {
 }
 
 function control(e) {
+  e.preventDefault();
   if (isGameOver) {
     if (e.key === "Enter") {
       start();
       return;
     }
   } else {
-    if (e.key === "ArrowLeft" && !isWeaponMoving) {
+    if (
+      (e.key === "ArrowLeft" || e.currentTarget.id === "move-left") &&
+      !isWeaponMoving
+    ) {
       console.log("want to move left");
       moveWeapon("left");
-    } else if (e.key === "ArrowRight" && !isWeaponMoving) {
+    } else if (
+      (e.key === "ArrowRight" || e.currentTarget.id === "move-right") &&
+      !isWeaponMoving
+    ) {
       console.log("want to move right");
       moveWeapon("right");
-    } else if (e.key === " " && bullets.length < bulletsCountMax) {
-      console.log("shot fired");
-      sounds.shoot.cloneNode().play();
-      generateNewBullet(
-        weaponParams.xPos + 20 - bulletParams.width / 2,
-        weaponParams.yPos + 40
-      );
-      if (bullets.length === 1) {
-        //if first bullet then start move timer
-        moveBulletsTimer = setInterval(moveBullets, bulletParams.delay);
-      }
+    } else if (e.key === " ") {
+      fire();
     }
-    console.log({ isWeaponMoving });
+    //console.log({ isWeaponMoving });
   }
   console.log(`key pressed: "${e.key}"`);
+  console.log(e.currentTarget);
   console.log({ isGameOver });
 }
 
+function fire() {
+  if (bullets.length >= bulletsCountMax) {
+    console.log("max number of bullets used");
+    return;
+  }
+  console.log("shot fired");
+  sounds.shoot.cloneNode().play();
+  generateNewBullet(
+    weaponParams.xPos + 20 - bulletParams.width / 2,
+    weaponParams.yPos + 40
+  );
+  if (bullets.length === 1) {
+    //if first bullet then start move timer
+    moveBulletsTimer = setInterval(moveBullets, bulletParams.delay);
+  }
+}
+
 function controlStop(e) {
-  if (!isGameOver) {
-    if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && isWeaponMoving) {
-      clearInterval(moveWeaponTimer);
-      isWeaponMoving = false;
-      console.log("weapon stopped");
-    }
+  if (!isGameOver && isWeaponMoving) {
+    clearInterval(moveWeaponTimer);
+    isWeaponMoving = false;
+    console.log("weapon stopped");
   }
 }
 
@@ -480,6 +521,9 @@ function gameOver() {
   missedDisplay.remove();
   destroyedDisplay.remove();
   levelDisplay.remove();
+  moveLeftIcon.remove();
+  moveRightIcon.remove();
+  fireControlIcon.remove();
   gameSummaryDisplay("on");
   asteroids.forEach((asteroid) => {
     asteroid.destroy(); //destroy all asteroid objects
@@ -507,6 +551,7 @@ function start() {
   createWeapon();
   createCounterDisplays();
   gameSummaryDisplay("off");
+  createTouchControls();
   initAsteroids();
   moveAsteroidsTimer = setInterval(moveAsteroids, asteroidParams.delay);
 }

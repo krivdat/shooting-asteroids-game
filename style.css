@@ -1,9 +1,7 @@
 body {
-  background-color: #2f3640;
-  background-image: url("./img/background-3907970_1920.jpg");
-  background-position: top;
-  background-repeat: no-repeat;
-  padding-top: 30px;
+  padding: 0;
+  margin: 0;
+  background-color: #1e272e;
 }
 
 * {
@@ -11,9 +9,9 @@ body {
 }
 
 .space {
-  width: 400px;
+  width: 350px;
   height: 600px;
-  margin: auto;
+  margin: 0 auto;
   background-image: url("./img/background01-with-earth.png");
   /*
   background: rgb(2, 0, 36);
@@ -24,7 +22,7 @@ body {
     rgba(0, 212, 255, 1) 100%
   );
   */
-  border: 1px grey solid;
+
   position: relative;
 }
 
@@ -59,8 +57,9 @@ body {
 .start-button {
   width: 300px;
   padding: 15px;
-  left: 50px;
+  left: 25px;
   top: 250px;
+  margin: 0 auto;
   background-color: #2f3640;
   color: #f5f6fa;
   border-radius: 10px;
@@ -80,7 +79,7 @@ body {
 
 .missed {
   color: red;
-  left: 330px;
+  left: 285px;
   top: 0px;
   text-align: right;
 }
@@ -93,7 +92,7 @@ body {
 }
 
 .level {
-  left: 170px;
+  left: 145px;
   top: 0px;
   padding: 4px 10px 2px 10px;
   font-family: monospace;
@@ -109,7 +108,7 @@ body {
 .game-summary {
   width: 300px;
   height: 200px;
-  left: 50px;
+  left: 25px;
   top: 70px;
   color: #f5f6fa;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -127,7 +126,7 @@ body {
   margin: 0;
   width: 280px;
   height: 120px;
-  left: 60px;
+  left: 35px;
   top: 420px;
   font-size: 12px;
   font-family: monospace;
@@ -151,7 +150,7 @@ body {
 }
 
 .footer {
-  width: 400px;
+  width: 350px;
   background-color: #2f3640;
   color: #f5f6fa;
   margin: 15px auto;
@@ -167,4 +166,48 @@ body {
 .footer a,
 a:visited {
   color: #f5f6fa;
+}
+
+.move-control {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+}
+
+.right {
+  bottom: 15px;
+  right: 5px;
+  background-image: url("./img/Icon_Arrow_Right_256x256.png");
+  background-size: contain;
+}
+
+.left {
+  bottom: 15px;
+  left: 5px;
+  background-image: url("./img/Icon_Arrow_Left_256x256.png");
+  background-size: contain;
+}
+
+.fire-control {
+  position: fixed;
+  width: 60px;
+  height: 80px;
+  bottom: 75px;
+  right: 5px;
+  background-image: url("./img/256px-HAL9000.svg.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 550px) {
+  body {
+    padding-top: 30px;
+    background-image: url("./img/background-3907970_1920.jpg");
+    background-position: top;
+    background-repeat: no-repeat;
+  }
+
+  .space {
+    border: 1px grey solid;
+  }
 }
