@@ -16,6 +16,8 @@ const topScores = [];
 const weaponParams = {
   xPos: 180,
   yPos: 10,
+  width: 40,
+  height: 40,
 };
 const levels = {
   1: {
@@ -329,9 +331,9 @@ function moveAsteroids() {
       }
     } else if (
       asteroids[i].xPos + asteroidParams.width > weaponParams.xPos &&
-      asteroids[i].xPos < weaponParams.xPos + 40 &&
+      asteroids[i].xPos < weaponParams.xPos + weaponParams.width &&
       asteroids[i].yPos + asteroidParams.height > weaponParams.yPos &&
-      asteroids[i].yPos < weaponParams.yPos + 40
+      asteroids[i].yPos < weaponParams.yPos + weaponParams.height
     ) {
       //asteroid crashed to weapon
       console.log("asteroid destroyed weapon");
@@ -428,7 +430,8 @@ function moveWeapon(direction) {
   moveWeaponTimer = setInterval(() => {
     if (
       (direction === "left" && weaponParams.xPos <= 5) ||
-      (direction === "right" && weaponParams.xPos >= spaceWidth - 5)
+      (direction === "right" &&
+        weaponParams.xPos >= spaceWidth - weaponParams.width - 5)
     ) {
       isWeaponMoving = false;
       clearInterval(moveWeaponTimer);
@@ -459,7 +462,8 @@ function control(e) {
     ) {
       console.log("want to move right");
       moveWeapon("right");
-    } else if (e.key === " ") {
+    }
+    if (e.key === " ") {
       fire();
     }
     //console.log({ isWeaponMoving });
@@ -487,6 +491,9 @@ function fire() {
 }
 
 function controlStop(e) {
+  if (e.key === " ") {
+    return;
+  }
   if (!isGameOver && isWeaponMoving) {
     clearInterval(moveWeaponTimer);
     isWeaponMoving = false;
