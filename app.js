@@ -8,10 +8,12 @@ const missedDisplay = document.createElement("div");
 const destroyedDisplay = document.createElement("div");
 const levelDisplay = document.createElement("div");
 const gameSummary = document.createElement("div");
+const gameTitle = document.createElement("div");
 const moveRightIcon = document.createElement("div");
 const moveLeftIcon = document.createElement("div");
 const fireControlIcon = document.createElement("div");
 const topScores = [];
+let isFirstStart = true;
 
 const weaponParams = {
   xPos: 180,
@@ -199,6 +201,16 @@ function createGameSummary() {
   space.appendChild(gameSummary);
 }
 
+function createGameTitle() {
+  let text = `
+    <h1>Shooting Asteroids</h1>`;
+  gameTitle.innerHTML = text;
+  gameTitle.classList.add("game-title");
+  space.appendChild(gameTitle);
+  console.log("created Game Title");
+  console.log(gameTitle);
+}
+
 function createTouchControls() {
   moveLeftIcon.classList.add("move-control", "left");
   moveRightIcon.classList.add("move-control", "right");
@@ -243,6 +255,17 @@ function gameSummaryDisplay(onoff) {
     gameSummary.style.display = "";
   } else if (onoff === "off") {
     gameSummary.style.display = "none";
+  }
+}
+
+function gameTitleDisplay(onoff) {
+  if (onoff === "on" || onoff === "") {
+    //console.log("displaying game title");
+    gameTitle.style.display = "";
+    console.log("game title switched on");
+  } else {
+    gameTitle.style.display = "none";
+    console.log("game title switched off");
   }
 }
 
@@ -558,6 +581,10 @@ function start() {
   createWeapon();
   createCounterDisplays();
   gameSummaryDisplay("off");
+  if (isFirstStart) {
+    gameTitleDisplay("off");
+    isFirstStart = false;
+  }
   createTouchControls();
   initAsteroids();
   moveAsteroidsTimer = setInterval(moveAsteroids, asteroidParams.delay);
@@ -567,3 +594,4 @@ createUI();
 initSounds();
 createGameSummary();
 gameSummaryDisplay("off");
+createGameTitle();
