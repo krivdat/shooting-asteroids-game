@@ -1,7 +1,11 @@
+import { topScoresTemplate } from "./displayElements.js";
+
 const space = document.querySelector(".space");
+// get space width from css property
 let str = window.getComputedStyle(space).width;
 str = str.slice(0, str.length - 2);
 const spaceWidth = Math.round(parseFloat(str, 10));
+// create DOM elements
 const weapon = document.createElement("div");
 const startButton = document.createElement("button");
 const missedDisplay = document.createElement("div");
@@ -12,8 +16,6 @@ const gameTitle = document.createElement("div");
 const moveRightIcon = document.createElement("div");
 const moveLeftIcon = document.createElement("div");
 const fireControlIcon = document.createElement("div");
-const topScores = [];
-let isFirstStart = true;
 
 const weaponParams = {
   xPos: 180,
@@ -60,8 +62,8 @@ const levels = {
 };
 
 const maxLevel = Object.keys(levels).length;
-const levelStep = 15; //number of destroyed asteroids to increase level
-let level = 1;
+const levelStep = 15; // number of destroyed asteroids to increase level
+let level = 1; // initial level
 const asteroids = [];
 let asteroidParams = { ...levels[level] };
 
@@ -74,11 +76,11 @@ const bulletParams = {
   height: 30,
 };
 const asteroidsInitCount = 5;
-let gapSinceLast = 0; //counter - when exceeds vertGap new asteroid is created
-let missedCount = 0; //asteroids passed bottom line
-const allowMissedCount = 3; //number of asteroids missed to end the game
+let gapSinceLast = 0; // counter - when exceeds vertGap new asteroid is created
+let missedCount = 0; // asteroids that passed bottom line
+const allowMissedCount = 3; // max number of asteroids missed to end the game
 let destroyedCount = 0;
-const bottomLine = 10; //y-distance from bottom where asteroids dissapear
+const bottomLine = 10; // y-distance from bottom where asteroids dissapear
 
 const sndUrls = {
   shoot: "./snd/257232__javierzumer__retro-shot-blaster.wav",
@@ -91,6 +93,20 @@ const sndUrls = {
 let sounds = {};
 
 let isGameOver = true;
+const topScores = [
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+  "tomas",
+];
+
+let isFirstStart = true;
 let isWeaponMoving = false;
 let moveAsteroidsTimer;
 let moveBulletsTimer;
@@ -100,22 +116,23 @@ class DisplayElement {
   constructor(cssClass, content = "") {
     this.el = document.createElement("div");
     this.content = content;
-    const vis = this.el;
-    vis.classList.add(cssClass);
-    vis.innerHTML = this.content;
-    space.appendChild(vis);
+    //const vis = this.el;
+    this.el.className = cssClass;
+    this.el.style.display = "none"; // do not display panel when created
+    this.el.innerHTML = this.content;
+    space.appendChild(this.el);
   }
 
   setContent(content) {
     this.content = content;
     this.el.innerHTML = this.content;
   }
-  display(onoff) {
+  display(onoff = "on") {
     //show or hide element
     if (onoff === "on") {
-      vis.style.display = "";
+      this.el.style.display = "";
     } else if (onoff === "off") {
-      vis.style.display = "none";
+      this.el.style.display = "none";
     }
   }
 
@@ -123,6 +140,7 @@ class DisplayElement {
     this.el.remove();
   }
 }
+const topScoresPanel = new DisplayElement("top-scores", topScoresTemplate);
 
 class Asteroid {
   constructor(xPos, yPos) {
@@ -132,7 +150,7 @@ class Asteroid {
     let vis = this.visual;
     vis.style.left = this.xPos + "px";
     vis.style.bottom = this.yPos + "px";
-    vis.classList.add("asteroid");
+    vis.className = "asteroid";
     space.appendChild(vis);
   }
 
@@ -149,7 +167,7 @@ class Explosion {
     const vis = this.visual;
     vis.style.left = this.xPos + "px";
     vis.style.bottom = this.yPos + "px";
-    vis.classList.add("explosion");
+    vis.className = "explosion";
     space.appendChild(vis);
   }
 
@@ -165,7 +183,7 @@ class Bullet {
     this.visual = document.createElement("div");
 
     const visual = this.visual;
-    visual.classList.add("bullet");
+    visual.className = "bullet";
     visual.style.left = this.xPos + "px";
     visual.style.bottom = this.yPos + "px";
     space.appendChild(visual);
@@ -177,19 +195,19 @@ class Bullet {
 }
 
 function createWeapon() {
-  weapon.classList.add("weapon");
+  weapon.className = "weapon";
   weapon.style.left = weaponParams.xPos + "px";
   weapon.style.bottom = weaponParams.yPos + "px";
   space.appendChild(weapon);
-  console.log("created weapon");
+  // console.log("created weapon");
 }
 
 function createCounterDisplays() {
-  missedDisplay.classList.add("counter", "missed");
+  missedDisplay.className = "counter missed";
   missedDisplay.textContent = missedCount;
-  levelDisplay.classList.add("level");
+  levelDisplay.className = "level";
   levelDisplay.textContent = "LEVEL " + level;
-  destroyedDisplay.classList.add("counter", "destroyed");
+  destroyedDisplay.className = "counter destroyed";
   destroyedDisplay.textContent = destroyedCount;
   space.appendChild(missedDisplay);
   space.appendChild(destroyedDisplay);
@@ -197,7 +215,7 @@ function createCounterDisplays() {
 }
 
 function createGameSummary() {
-  gameSummary.classList.add("game-summary");
+  gameSummary.className = "game-summary";
   space.appendChild(gameSummary);
 }
 
@@ -205,16 +223,16 @@ function createGameTitle() {
   let text = `
     <h1>Shooting Asteroids</h1>`;
   gameTitle.innerHTML = text;
-  gameTitle.classList.add("game-title");
+  gameTitle.className = "game-title";
   space.appendChild(gameTitle);
-  console.log("created Game Title");
-  console.log(gameTitle);
+  // console.log("created Game Title");
+  // console.log(gameTitle);
 }
 
 function createTouchControls() {
-  moveLeftIcon.classList.add("move-control", "left");
-  moveRightIcon.classList.add("move-control", "right");
-  fireControlIcon.classList.add("fire-control");
+  moveLeftIcon.className = "move-control left";
+  moveRightIcon.className = "move-control right";
+  fireControlIcon.className = "fire-control";
   moveLeftIcon.setAttribute("id", "move-left");
   moveRightIcon.setAttribute("id", "move-right");
   space.appendChild(moveLeftIcon);
@@ -262,10 +280,10 @@ function gameTitleDisplay(onoff) {
   if (onoff === "on" || onoff === "") {
     //console.log("displaying game title");
     gameTitle.style.display = "";
-    console.log("game title switched on");
+    // console.log("game title switched on");
   } else {
     gameTitle.style.display = "none";
-    console.log("game title switched off");
+    // console.log("game title switched off");
   }
 }
 
@@ -283,12 +301,12 @@ function generateNewAsteroid(xPos, yPos) {
 
 function generateNewBullet(xPos, yPos) {
   if (bullets.length >= bulletsCountMax) {
-    console.log("shot not fired - max number of bullets reached");
+    // console.log("shot not fired - max number of bullets reached");
     return false;
   }
   const newBullet = new Bullet(xPos, yPos);
   bullets.push(newBullet);
-  console.log(bullets);
+  // console.log(bullets);
 }
 
 function initAsteroids() {
@@ -307,7 +325,7 @@ function initAsteroids() {
 }
 
 function createUI() {
-  startButton.classList.add("start-button");
+  startButton.className = "start-button";
   startButton.innerHTML = `
     <h2>PRESS ENTER OR CLICK HERE TO START</h2>
     <p>controls: <br />&#8592; &#8594; to move weapon, spacebar to shoot</p>`;
@@ -315,28 +333,6 @@ function createUI() {
   startButton.addEventListener("click", start);
   document.addEventListener("keydown", control);
   document.addEventListener("keyup", controlStop);
-  // const topScoresPanel = new DisplayElement("top-scores", "Top Scores");
-  // topScoresPanel.setContent(
-  //   `<h3>Top Scores</h3>
-  //   <div>
-  //     <ol>
-  //       <li>tomas</li>
-  //       <li>andrej</li>
-  //       <li>matus</li>
-  //       <li>matus</li>
-  //       <li>matus</li>
-  //     </ol>
-  //   </div>
-  //   <div>
-  //     <ol>
-  //       <li>tomas</li>
-  //       <li>andrej</li>
-  //       <li>matus</li>
-  //       <li>matus</li>
-  //       <li>matus</li>
-  //     </ol>
-  //   </div>`
-  // );
 }
 
 function moveAsteroids() {
@@ -348,7 +344,7 @@ function moveAsteroids() {
       updateCounterDisplays();
       asteroids[i].destroy();
       asteroids.splice(i, 1);
-      console.log("missed asteroids: ", missedCount);
+      // console.log("missed asteroids: ", missedCount);
       if (missedCount >= allowMissedCount) {
         gameOver();
       }
@@ -359,7 +355,7 @@ function moveAsteroids() {
       asteroids[i].yPos < weaponParams.yPos + weaponParams.height
     ) {
       //asteroid crashed to weapon
-      console.log("asteroid destroyed weapon");
+      // console.log("asteroid destroyed weapon");
       sounds.blast.cloneNode().play();
       missedCount += 1;
       updateCounterDisplays();
@@ -390,12 +386,12 @@ function moveBullets() {
     bullet.yPos += bulletParams.step;
     if (bullet.yPos >= 600 - bulletParams.height) {
       //reached top of space
-      console.log("bullet reached top of space");
+      // console.log("bullet reached top of space");
       bullet.destroy();
       bullets.splice(indexOfBullet, 1);
       if (bullets.length === 0) {
         // if removed bullet was the last
-        console.log("no more bullets to move");
+        // console.log("no more bullets to move");
         clearInterval(moveBulletsTimer);
         return;
       }
@@ -411,7 +407,7 @@ function moveBullets() {
           bullet.yPos + bulletParams.height > asteroid.yPos &&
           bullet.yPos < asteroid.yPos + asteroidParams.height
         ) {
-          console.log("bullet hit the asteroid");
+          // console.log("bullet hit the asteroid");
           sounds.blast.cloneNode().play();
           destroyedCount++;
           //check if we want to increase level
@@ -419,7 +415,7 @@ function moveBullets() {
             level++;
             asteroidParams = { ...levels[level] };
             sounds.levelUp.cloneNode().play();
-            console.log("increased level to ", level);
+            // console.log("increased level to ", level);
           }
           updateCounterDisplays();
           const explosion = new Explosion(asteroid.xPos, asteroid.yPos);
@@ -430,7 +426,7 @@ function moveBullets() {
           asteroids.splice(indexOfAsteroid, 1);
           if (bullets.length === 0) {
             //if removed bullet was the last exit function
-            console.log("no more bullets to move");
+            // console.log("no more bullets to move");
             clearInterval(moveBulletsTimer);
             return;
           }
@@ -448,7 +444,7 @@ function moveWeapon(direction) {
     right: 5,
   };
   isWeaponMoving = true;
-  console.log("moved");
+  // console.log("moved");
 
   moveWeaponTimer = setInterval(() => {
     if (
@@ -477,13 +473,13 @@ function control(e) {
       (e.key === "ArrowLeft" || e.currentTarget.id === "move-left") &&
       !isWeaponMoving
     ) {
-      console.log("want to move left");
+      // console.log("want to move left");
       moveWeapon("left");
     } else if (
       (e.key === "ArrowRight" || e.currentTarget.id === "move-right") &&
       !isWeaponMoving
     ) {
-      console.log("want to move right");
+      // console.log("want to move right");
       moveWeapon("right");
     }
     if (e.key === " ") {
@@ -491,17 +487,17 @@ function control(e) {
     }
     //console.log({ isWeaponMoving });
   }
-  console.log(`key pressed: "${e.key}"`);
-  console.log(e.currentTarget);
-  console.log({ isGameOver });
+  // console.log(`key pressed: "${e.key}"`);
+  // console.log(e.currentTarget);
+  // console.log({ isGameOver });
 }
 
 function fire() {
   if (bullets.length >= bulletsCountMax) {
-    console.log("max number of bullets used");
+    // console.log("max number of bullets used");
     return;
   }
-  console.log("shot fired");
+  // console.log("shot fired");
   sounds.shoot.cloneNode().play();
   generateNewBullet(
     weaponParams.xPos + 20 - bulletParams.width / 2,
@@ -520,7 +516,7 @@ function controlStop(e) {
   if (!isGameOver && isWeaponMoving) {
     clearInterval(moveWeaponTimer);
     isWeaponMoving = false;
-    console.log("weapon stopped");
+    // console.log("weapon stopped");
   }
 }
 
@@ -535,12 +531,12 @@ function initSounds() {
   };
   Object.keys(sounds).forEach((type) => {
     sounds[type].load();
-    console.log(`sound "${type}" loaded`);
+    // console.log(`sound "${type}" loaded`);
   });
 }
 
 function gameOver() {
-  console.log("Game over!");
+  // console.log("Game over!");
   isGameOver = true;
   sounds.gameOver.play();
   clearInterval(moveAsteroidsTimer);
@@ -555,14 +551,15 @@ function gameOver() {
   moveRightIcon.remove();
   fireControlIcon.remove();
   gameSummaryDisplay("on");
+  topScoresPanel.display();
   asteroids.forEach((asteroid) => {
     asteroid.destroy(); //destroy all asteroid objects
   });
-  asteroids.length = 0; //empty asteroids array
+  asteroids.length = 0; //empty asteroids array, just in case
   bullets.forEach((bullet) => {
     bullet.destroy(); //destroy all bullets
   });
-  bullets.length = 0; //empty bullets array
+  bullets.length = 0; //empty bullets array, just in case
   missedCount = 0;
   destroyedCount = 0;
   gapSinceLast = 0;
@@ -581,6 +578,7 @@ function start() {
   createWeapon();
   createCounterDisplays();
   gameSummaryDisplay("off");
+  topScoresPanel.display("off");
   if (isFirstStart) {
     gameTitleDisplay("off");
     isFirstStart = false;
