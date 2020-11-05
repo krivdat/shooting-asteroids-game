@@ -1,7 +1,7 @@
 import { topScoresTemplate, userLoginTemplate } from './displayElements.js';
 
-// const API_URL = 'https://krivdat-api.herokuapp.com/asteroids';
-const API_URL = 'http://localhost:3000/asteroids';
+const API_URL = 'https://krivdat-api.herokuapp.com/asteroids';
+// const API_URL = 'http://localhost:3000/asteroids';
 
 const space = document.querySelector('.space');
 // get space width from css property
