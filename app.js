@@ -146,6 +146,11 @@ const topScoresPanel = new DisplayElement(
   topScoresTemplate(topScores)
 );
 const userLoginPanel = new DisplayElement('user-login', userLoginTemplate());
+const statusBarEl = new DisplayElement('status-bar');
+
+function setStatus(msg) {
+  statusBarEl.setContent(msg);
+}
 
 class Asteroid {
   constructor(xPos, yPos) {
@@ -541,6 +546,7 @@ function initSounds() {
 }
 
 function gameOver() {
+  setStatus('game over');
   isGameOver = true;
   sounds.gameOver.play();
   clearInterval(moveAsteroidsTimer);
@@ -582,6 +588,7 @@ function start() {
   if (!isGameOver) {
     return; //already playing
   }
+  setStatus(`Go, ${isLogged ? loggedUser.username : 'human'}, go!`);
   startButton.style.display = 'none';
   sounds.gameStart.play();
   isGameOver = false;
@@ -620,52 +627,66 @@ async function updateTopScores() {
   if (!isLogged) {
     // user not logged in
     console.log('user is not logged in, calling register function');
+    gameSummaryDisplay('off');
     const loginSuccess = await registerNewUser();
     if (!loginSuccess) {
       console.log('could not register new user');
+      setStatus(`registering process failed:(`);
+      gameSummaryDisplay();
       return false;
     }
+    gameSummaryDisplay();
+    setStatus('wait, updating TOP 10 scores...');
     const dbUpdateSuccess = await updateTopScoresDb();
+    setStatus('');
     if (!dbUpdateSuccess) {
       console.log('could not update remote topScore database');
+      setStatus(`could not update TOP 10 scores:(`);
       return false;
     }
     console.log('remote user database updated successfully');
+    setStatus(`TOP 10 scores updated successfully`);
     return;
   } else {
     // if user is already logged in
+    setStatus('wait, updating TOP 10 scores...');
     const dbUpdateSuccess = await updateTopScoresDb();
     if (!dbUpdateSuccess) {
       console.log('could not update remote topScore database');
+      setStatus(`could not update TOP 10 scores:(`);
       return false;
     }
+    setStatus(`TOP 10 scores updated successfully`);
     console.log('remote user database updated successfully');
     return;
   }
 }
 
-async function updateTopScoresDb() {
-  const postResp = await fetch(API_URL + '/top-scores', {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      username: loggedUser.username,
-      secret: loggedUser.secret,
-      score: destroyedCount,
-    }),
+function updateTopScoresDb() {
+  return new Promise(async (resolve, reject) => {
+    const postResp = await fetch(API_URL + '/top-scores', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: loggedUser.username,
+        secret: loggedUser.secret,
+        score: destroyedCount,
+      }),
+    });
+    const postData = await postResp.json();
+    if (postData.status !== 'success') {
+      console.error('cannot update top scores database', postData.message);
+      reject();
+    }
+    console.log('top scores updated successfully');
+    topScores = postData.topScores;
+    resolve('done');
   });
-  const postData = await postResp.json();
-  if (postData.status !== 'success') {
-    console.error('cannot update top scores database', postData.message);
-    return false;
-  }
-  console.log('top scores updated successfully');
-  topScores = postData.topScores;
-  return true;
 }
 
 function registerNewUser() {
   return new Promise((resolve, reject) => {
+    gameSummaryDisplay('off');
     document.removeEventListener('keydown', control);
     document.removeEventListener('keyup', controlStop);
     userLoginPanel.display();
@@ -688,6 +709,7 @@ function registerNewUser() {
         console.log(msg);
         statusMsg.textContent = msg;
       } else {
+        setStatus('moment please...');
         const postResp = await fetch(API_URL + '/users', {
           method: 'post',
           headers: { 'Content-Type': 'application/json' },
@@ -698,6 +720,7 @@ function registerNewUser() {
         if (postData.status !== 'success') {
           console.log(postdata.message);
           statusMsg.textContent = 'something went wrong, try again...';
+          setStatus('');
         } else {
           console.log('user was successfully registered');
           statusMsg.textContent = `Thank you ${postData.username}, you are now registered!`;
@@ -706,14 +729,16 @@ function registerNewUser() {
             username: postData.username,
             secret: postData.secret,
           };
+          setStatus(`Hi ${loggedUser.username}, you are now registered.`);
           localStorage.setItem(
             'asteroidsLoggedUser',
             JSON.stringify(loggedUser)
           );
           input.value = '';
-          document.removeEventListener('keydown', control);
-          document.removeEventListener('keyup', controlStop);
+          document.addEventListener('keydown', control);
+          document.addEventListener('keyup', controlStop);
           userLoginPanel.display('off');
+          gameSummaryDisplay('on');
           resolve(loggedUser);
         }
       }
@@ -722,6 +747,12 @@ function registerNewUser() {
 }
 
 createUI();
+statusBarEl.display();
+if (isLogged) {
+  setStatus(`Welcome back, <strong>${loggedUser.username}</strong>!`);
+} else {
+  setStatus('Welcome, human!');
+}
 initSounds();
 createGameSummary();
 gameSummaryDisplay('off');
