@@ -580,6 +580,19 @@ function start() {
   );
 }
 
+async function initGetTopScores() {
+  // get current top scores from remote db
+  const resp = await fetch(API_URL + '/top-scores');
+  const data = await resp.json();
+  console.log(data);
+  if (data.topScores.length > 0) {
+    topScores = data.topScores;
+  }
+  console.log('current fetched topscores:', topScores);
+  topScoresPanel.setContent(topScoresTemplate(topScores));
+  topScoresPanel.display();
+}
+
 async function updateTopScores() {
   // get current top scores from remote db
   const resp = await fetch(API_URL + '/top-scores');
@@ -730,3 +743,4 @@ initSounds();
 createGameSummary();
 gameSummaryDisplay('off');
 createGameTitle();
+initGetTopScores();
