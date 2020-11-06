@@ -532,6 +532,7 @@ function gameOver() {
   gameSummaryDisplay();
 
   if (!maintenanceMode) {
+    console.log('starting update of top scores');
     updateTopScores().then(() => {
       console.log(
         'topscores variable before topscores.setcontent call',
@@ -543,6 +544,13 @@ function gameOver() {
       destroyedCount = 0;
       startButton.style.display = '';
     });
+  } else {
+    console.log('In maintenance mode - skipping update of top scores.');
+    topScoresPanel.setContent(topScoresTemplate(topScores));
+    topScoresPanel.display();
+    missedCount = 0;
+    destroyedCount = 0;
+    startButton.style.display = '';
   }
 }
 
