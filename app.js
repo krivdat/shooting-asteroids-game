@@ -1,7 +1,7 @@
 import { topScoresTemplate, userLoginTemplate } from './displayElements.js';
 import levels from './levels.js';
 
-const maintenanceMode = true;
+const maintenanceMode = false;
 const API_URL = 'https://krivdat-api.herokuapp.com/asteroids';
 // const API_URL = 'http://localhost:3000/asteroids';
 
