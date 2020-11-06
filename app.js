@@ -19,6 +19,7 @@ const gameTitle = document.createElement('div');
 const moveRightIcon = document.createElement('div');
 const moveLeftIcon = document.createElement('div');
 const fireControlIcon = document.createElement('div');
+const asteroidsMoveInterval = 40; // general move delay in ms
 
 const weaponParams = {
   xPos: 180,
@@ -28,47 +29,47 @@ const weaponParams = {
 };
 const levels = {
   1: {
-    step: 2,
-    delay: 50,
+    stepMin: 2,
+    stepMax: 2,
     width: 30,
     height: 30,
-    vertGap: 70,
+    genNewAsteroidInt: 1800,
   },
   2: {
-    step: 3,
-    delay: 50,
+    stepMin: 2,
+    stepMax: 3,
     width: 30,
     height: 30,
-    vertGap: 70,
+    genNewAsteroidInt: 1650,
   },
   3: {
-    step: 4,
-    delay: 50,
+    stepMin: 2,
+    stepMax: 4,
     width: 30,
     height: 30,
-    vertGap: 70,
+    genNewAsteroidInt: 1500,
   },
   4: {
-    step: 4,
-    delay: 50,
+    stepMin: 2,
+    stepMax: 5,
     width: 30,
     height: 30,
-    vertGap: 60,
+    genNewAsteroidInt: 1500,
   },
   5: {
-    step: 4,
-    delay: 50,
+    stepMin: 3,
+    stepMax: 5,
     width: 30,
     height: 30,
-    vertGap: 50,
+    genNewAsteroidInt: 1500,
   },
 };
 
 const maxLevel = Object.keys(levels).length;
 const levelStep = 15; // number of destroyed asteroids to increase level
 let level = 1; // initial level
+
 const asteroids = [];
-let asteroidParams = { ...levels[level] };
 
 const bullets = [];
 const bulletsCountMax = 3;
@@ -78,8 +79,6 @@ const bulletParams = {
   width: 15,
   height: 30,
 };
-const asteroidsInitCount = 5;
-let gapSinceLast = 0; // counter - when exceeds vertGap new asteroid is created
 let missedCount = 0; // asteroids that passed bottom line
 const allowMissedCount = 3; // max number of asteroids missed to end the game
 let destroyedCount = 0;
@@ -104,6 +103,7 @@ for (let i = 0; i < 10; i++) {
 let isFirstStart = true;
 let isWeaponMoving = false;
 let moveAsteroidsTimer;
+let genNewAsteroidsTimer;
 let moveBulletsTimer;
 let moveWeaponTimer;
 let isLogged = false;
@@ -153,9 +153,12 @@ function setStatus(msg) {
 }
 
 class Asteroid {
-  constructor(xPos, yPos) {
+  constructor(xPos, yPos, width, height, step) {
     this.yPos = yPos;
     this.xPos = xPos;
+    this.width = width;
+    this.height = height;
+    this.step = step; // px to move with each interval aka speed
     this.visual = document.createElement('div');
     let vis = this.visual;
     vis.style.left = this.xPos + 'px';
@@ -210,6 +213,11 @@ function createWeapon() {
   weapon.style.bottom = weaponParams.yPos + 'px';
   space.appendChild(weapon);
   // console.log("created weapon");
+}
+
+function getRandBetween(min, max) {
+  // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function createCounterDisplays() {
@@ -303,10 +311,15 @@ function updateCounterDisplays() {
   levelDisplay.textContent = 'LEVEL ' + level;
 }
 
-function generateNewAsteroid(xPos, yPos) {
-  const newAsteroid = new Asteroid(xPos, yPos);
+function generateNewAsteroid() {
+  //create new asteroid on top
+  const width = levels[level].width;
+  const height = levels[level].height;
+  const xPos = getRandBetween(20, spaceWidth - 20 - width);
+  const yPos = 600 - 10 - height;
+  const step = getRandBetween(levels[level].stepMin, levels[level].stepMax);
+  const newAsteroid = new Asteroid(xPos, yPos, width, height, step);
   asteroids.push(newAsteroid);
-  //console.log(asteroids);
 }
 
 function generateNewBullet(xPos, yPos) {
@@ -320,18 +333,7 @@ function generateNewBullet(xPos, yPos) {
 }
 
 function initAsteroids() {
-  for (let i = 0; i < asteroidsInitCount; i++) {
-    const xPos = Math.round(
-      Math.random() * (spaceWidth - 20 * 2 - asteroidParams.width) + 20
-    );
-    const yPos =
-      600 -
-      asteroidsInitCount * asteroidParams.vertGap -
-      40 +
-      i * asteroidParams.vertGap;
-    //10px empty space on top
-    generateNewAsteroid(xPos, yPos);
-  }
+  generateNewAsteroid(); // generate first one only
 }
 
 function createUI() {
@@ -359,9 +361,9 @@ function moveAsteroids() {
         gameOver();
       }
     } else if (
-      asteroids[i].xPos + asteroidParams.width > weaponParams.xPos &&
+      asteroids[i].xPos + asteroids[i].width > weaponParams.xPos &&
       asteroids[i].xPos < weaponParams.xPos + weaponParams.width &&
-      asteroids[i].yPos + asteroidParams.height > weaponParams.yPos &&
+      asteroids[i].yPos + asteroids[i].height > weaponParams.yPos &&
       asteroids[i].yPos < weaponParams.yPos + weaponParams.height
     ) {
       //asteroid crashed to weapon
@@ -372,21 +374,10 @@ function moveAsteroids() {
       gameOver();
     } else {
       //move asteroids
-      asteroids[i].yPos -= asteroidParams.step;
+      asteroids[i].yPos -= asteroids[i].step;
       asteroids[i].visual.style.bottom = asteroids[i].yPos + 'px';
-
-      if (gapSinceLast >= asteroidParams.vertGap) {
-        //create new asteroid on top
-        const xPos = Math.round(
-          Math.random() * (spaceWidth - 20 * 2 - asteroidParams.width) + 20
-        );
-        const yPos = 600 - 10 - asteroidParams.height;
-        generateNewAsteroid(xPos, yPos);
-        gapSinceLast = 0;
-      }
     }
   }
-  gapSinceLast += asteroidParams.step;
 }
 
 function moveBullets() {
@@ -413,9 +404,9 @@ function moveBullets() {
         let asteroid = asteroids[indexOfAsteroid];
         if (
           bullet.xPos + bulletParams.width > asteroid.xPos &&
-          bullet.xPos < asteroid.xPos + asteroidParams.width &&
+          bullet.xPos < asteroid.xPos + asteroid.width &&
           bullet.yPos + bulletParams.height > asteroid.yPos &&
-          bullet.yPos < asteroid.yPos + asteroidParams.height
+          bullet.yPos < asteroid.yPos + asteroid.height
         ) {
           // console.log("bullet hit the asteroid");
           sounds.blast.cloneNode().play();
@@ -423,7 +414,11 @@ function moveBullets() {
           //check if we want to increase level
           if (destroyedCount % levelStep === 0 && level < maxLevel) {
             level++;
-            asteroidParams = { ...levels[level] };
+            clearInterval(genNewAsteroidsTimer);
+            genNewAsteroidsTimer = setInterval(
+              generateNewAsteroid,
+              levels[level].genNewAsteroidInt
+            );
             sounds.levelUp.cloneNode().play();
             // console.log("increased level to ", level);
           }
@@ -546,13 +541,14 @@ function initSounds() {
 }
 
 function gameOver() {
-  setStatus('game over');
   isGameOver = true;
-  sounds.gameOver.play();
   clearInterval(moveAsteroidsTimer);
+  clearInterval(genNewAsteroidsTimer);
   clearInterval(moveBulletsTimer);
   clearInterval(moveWeaponTimer);
   isWeaponMoving = false;
+  setStatus('game over');
+  sounds.gameOver.play();
   weapon.remove();
   missedDisplay.remove();
   destroyedDisplay.remove();
@@ -568,7 +564,6 @@ function gameOver() {
     bullet.destroy(); //destroy all bullets
   });
   bullets.length = 0; //empty bullets array, just in case
-  gapSinceLast = 0;
   gameSummaryDisplay();
 
   updateTopScores().then(() => {
@@ -593,7 +588,6 @@ function start() {
   sounds.gameStart.play();
   isGameOver = false;
   level = 1;
-  asteroidParams = { ...levels[level] };
   createWeapon();
   createCounterDisplays();
   gameSummaryDisplay('off');
@@ -604,7 +598,11 @@ function start() {
   }
   createTouchControls();
   initAsteroids();
-  moveAsteroidsTimer = setInterval(moveAsteroids, asteroidParams.delay);
+  moveAsteroidsTimer = setInterval(moveAsteroids, asteroidsMoveInterval);
+  genNewAsteroidsTimer = setInterval(
+    generateNewAsteroid,
+    levels[level].genNewAsteroidInt
+  );
 }
 
 async function updateTopScores() {
