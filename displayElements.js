@@ -24,7 +24,7 @@ const userLoginTemplate = function (msg = '') {
     <h3>Enter your nickname to be listed in TOP 10 scores:</h3>
     <form id="user-login" class="user-login-form">
       <label for="username">max 10 characters</label>
-      <input id="username" type="text" placeholder="mycoolnick" maxlength="10" />
+      <input id="username" type="text" placeholder="mycoolnick" maxlength="10" autofocus />
       <button id="user-submit" type="submit">Submit</button>
     </form>
     <p id="status-msg">${msg}</p>
