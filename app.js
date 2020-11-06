@@ -1,5 +1,7 @@
 import { topScoresTemplate, userLoginTemplate } from './displayElements.js';
+import levels from './levels.js';
 
+const maintenanceMode = true;
 const API_URL = 'https://krivdat-api.herokuapp.com/asteroids';
 // const API_URL = 'http://localhost:3000/asteroids';
 
@@ -26,43 +28,6 @@ const weaponParams = {
   yPos: 10,
   width: 40,
   height: 40,
-};
-const levels = {
-  1: {
-    stepMin: 2,
-    stepMax: 2,
-    width: 30,
-    height: 30,
-    genNewAsteroidInt: 1800,
-  },
-  2: {
-    stepMin: 2,
-    stepMax: 3,
-    width: 30,
-    height: 30,
-    genNewAsteroidInt: 1650,
-  },
-  3: {
-    stepMin: 2,
-    stepMax: 4,
-    width: 30,
-    height: 30,
-    genNewAsteroidInt: 1500,
-  },
-  4: {
-    stepMin: 2,
-    stepMax: 5,
-    width: 30,
-    height: 30,
-    genNewAsteroidInt: 1500,
-  },
-  5: {
-    stepMin: 3,
-    stepMax: 5,
-    width: 30,
-    height: 30,
-    genNewAsteroidInt: 1500,
-  },
 };
 
 const maxLevel = Object.keys(levels).length;
@@ -566,17 +531,19 @@ function gameOver() {
   bullets.length = 0; //empty bullets array, just in case
   gameSummaryDisplay();
 
-  updateTopScores().then(() => {
-    console.log(
-      'topscores variable before topscores.setcontent call',
-      topScores
-    );
-    topScoresPanel.setContent(topScoresTemplate(topScores));
-    topScoresPanel.display();
-    missedCount = 0;
-    destroyedCount = 0;
-    startButton.style.display = '';
-  });
+  if (!maintenanceMode) {
+    updateTopScores().then(() => {
+      console.log(
+        'topscores variable before topscores.setcontent call',
+        topScores
+      );
+      topScoresPanel.setContent(topScoresTemplate(topScores));
+      topScoresPanel.display();
+      missedCount = 0;
+      destroyedCount = 0;
+      startButton.style.display = '';
+    });
+  }
 }
 
 function start() {
