@@ -308,6 +308,7 @@ function createUI() {
     <h2>PRESS ENTER OR CLICK HERE TO START</h2>
     <p>controls: <br />&#8592; &#8594; to move weapon, spacebar to shoot</p>`;
   space.appendChild(startButton);
+  startButton.style.display = 'none';
   startButton.addEventListener('click', start);
   document.addEventListener('keydown', control);
   document.addEventListener('keyup', controlStop);
@@ -586,7 +587,8 @@ function start() {
 
 async function initGetTopScores() {
   // get current top scores from remote db
-
+  topScoresPanel.setContent('wait, loading TOP 10 scores...');
+  topScoresPanel.display();
   const resp = await fetch(API_URL + '/top-scores');
   const data = await resp.json();
   console.log(data);
@@ -595,7 +597,7 @@ async function initGetTopScores() {
   }
   console.log('current fetched topscores:', topScores);
   topScoresPanel.setContent(topScoresTemplate(topScores));
-  topScoresPanel.display();
+  startButton.style.display = '';
 }
 
 async function updateTopScores() {

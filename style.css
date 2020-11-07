@@ -13,7 +13,7 @@ body {
   width: 350px;
   height: 600px;
   margin: 0 auto;
-  background-image: url('./img/background01-with-earth.png');
+  background-image: url('./img/background01-with-earth-tiny.png');
   /*
   background: rgb(2, 0, 36);
   background: linear-gradient(
@@ -318,7 +318,7 @@ a:visited {
 @media (min-width: 550px) {
   body {
     padding-top: 30px;
-    background-image: url('./img/background-3907970_1920.jpg');
+    background-image: url('./img/background-3907970_1920-tiny.jpg');
     background-position: top;
     background-repeat: no-repeat;
   }
