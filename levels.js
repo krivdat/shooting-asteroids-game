@@ -34,13 +34,20 @@ export default {
     stepMax: 6,
     width: 30,
     height: 30,
-    genNewAsteroidInt: 1000,
+    genNewAsteroidInt: 900,
   },
   6: {
     stepMin: 4,
     stepMax: 6,
     width: 30,
     height: 30,
-    genNewAsteroidInt: 500,
+    genNewAsteroidInt: 700,
+  },
+  7: {
+    stepMin: 5,
+    stepMax: 6,
+    width: 30,
+    height: 30,
+    genNewAsteroidInt: 600,
   },
 };
