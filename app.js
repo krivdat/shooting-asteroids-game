@@ -3,7 +3,7 @@ import levels from './levels.js';
 
 const maintenanceMode = false;
 // const API_URL = 'https://krivdat-api.herokuapp.com/asteroids';
-const API_URL = 'https://35.234.64.91/asteroids';
+const API_URL = 'http://35.234.64.91/asteroids';
 // const API_URL = 'http://localhost:3000/asteroids';
 
 const space = document.querySelector('.space');
@@ -583,6 +583,7 @@ function start() {
 
 async function initGetTopScores() {
   // get current top scores from remote db
+
   const resp = await fetch(API_URL + '/top-scores');
   const data = await resp.json();
   console.log(data);
