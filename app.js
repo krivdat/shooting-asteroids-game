@@ -38,7 +38,7 @@ let level = 1; // initial level
 const asteroids = [];
 
 const bullets = [];
-const bulletsCountMax = 3;
+let bulletsCountMax = 3;
 const bulletParams = {
   step: 3,
   delay: 20,
@@ -380,6 +380,9 @@ function moveBullets() {
           //check if we want to increase level
           if (destroyedCount % levelStep === 0 && level < maxLevel) {
             level++;
+            if (level === 6) {
+              bulletsCountMax = 5;
+            }
             clearInterval(genNewAsteroidsTimer);
             genNewAsteroidsTimer = setInterval(
               generateNewAsteroid,
