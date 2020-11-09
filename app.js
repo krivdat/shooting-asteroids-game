@@ -597,6 +597,7 @@ async function initGetTopScores() {
   }
   console.log('current fetched topscores:', topScores);
   topScoresPanel.setContent(topScoresTemplate(topScores));
+  console.log(startButton.style);
   startButton.style.display = '';
 }
 
@@ -609,13 +610,15 @@ async function updateTopScores() {
     topScores = data.topScores;
   }
   console.log('current fetched topscores:', topScores);
+  console.log(data.status);
   if (data.status !== 'success') {
     return false;
   }
-  const minScore = Math.min(topScores.map((item) => item.score));
+  const minScore = topScores[topScores.length - 1].score;
+  console.log({ minScore });
   if (topScores.length >= 10 && minScore > destroyedCount) {
     console.log('Score not high enough for top 10');
-    return false;
+    return;
   }
   if (!isLogged) {
     // user not logged in
@@ -631,11 +634,10 @@ async function updateTopScores() {
     gameSummaryDisplay();
     setStatus('wait, updating TOP 10 scores...');
     const dbUpdateSuccess = await updateTopScoresDb();
-    setStatus('');
-    if (!dbUpdateSuccess) {
+    if (dbUpdateSuccess === 'rejected') {
       console.log('could not update remote topScore database');
       setStatus(`could not update TOP 10 scores:(`);
-      return false;
+      return;
     }
     console.log('remote user database updated successfully');
     setStatus(`TOP 10 scores updated successfully`);
@@ -644,10 +646,10 @@ async function updateTopScores() {
     // if user is already logged in
     setStatus('wait, updating TOP 10 scores...');
     const dbUpdateSuccess = await updateTopScoresDb();
-    if (!dbUpdateSuccess) {
+    if (dbUpdateSuccess === 'rejected') {
       console.log('could not update remote topScore database');
       setStatus(`could not update TOP 10 scores:(`);
-      return false;
+      return;
     }
     setStatus(`TOP 10 scores updated successfully`);
     console.log('remote user database updated successfully');
@@ -669,7 +671,7 @@ function updateTopScoresDb() {
     const postData = await postResp.json();
     if (postData.status !== 'success') {
       console.error('cannot update top scores database', postData.message);
-      reject();
+      resolve('rejected');
     }
     console.log('top scores updated successfully');
     topScores = postData.topScores;
