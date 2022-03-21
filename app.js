@@ -28,7 +28,7 @@ const weaponParams = {
   xPos: 180,
   yPos: 10,
   width: 40,
-  height: 40,
+  height: 40
 };
 
 const maxLevel = Object.keys(levels).length;
@@ -43,12 +43,12 @@ const bulletParams = {
   step: 3,
   delay: 20,
   width: 15,
-  height: 30,
+  height: 30
 };
 let missedCount = 0; // asteroids that passed bottom line
 const allowMissedCount = 3; // max number of asteroids missed to end the game
 let destroyedCount = 0;
-const bottomLine = 10; // y-distance from bottom where asteroids dissapear
+const bottomLine = 10; // y-distance from bottom where asteroids disappear
 
 const sndUrls = {
   shoot: './snd/257232__javierzumer__retro-shot-blaster.wav',
@@ -56,7 +56,7 @@ const sndUrls = {
   missed: './snd/49693__ejfortin__energy-gloves.wav',
   levelUp: './snd/412165__screamstudio__arcade-level.wav',
   gameOver: './snd/365766__matrixxx__game-over-03.wav',
-  gameStart: './snd/196889__ionicsmusic__race-robot-start.wav',
+  gameStart: './snd/196889__ionicsmusic__race-robot-start.wav'
 };
 let sounds = {};
 
@@ -107,10 +107,7 @@ class DisplayElement {
     this.el.remove();
   }
 }
-const topScoresPanel = new DisplayElement(
-  'top-scores',
-  topScoresTemplate(topScores)
-);
+const topScoresPanel = new DisplayElement('top-scores', topScoresTemplate(topScores));
 const userLoginPanel = new DisplayElement('user-login', userLoginTemplate());
 const statusBarEl = new DisplayElement('status-bar');
 
@@ -127,8 +124,7 @@ class Asteroid {
     this.step = step; // px to move with each interval aka speed
     this.visual = document.createElement('div');
     let vis = this.visual;
-    vis.style.left = this.xPos + 'px';
-    vis.style.bottom = this.yPos + 'px';
+    vis.style.transform = `translate(${this.xPos}px, ${this.yPos}px)`;
     vis.className = 'asteroid';
     space.appendChild(vis);
   }
@@ -144,8 +140,7 @@ class Explosion {
     this.xPos = xPos;
     this.visual = document.createElement('div');
     const vis = this.visual;
-    vis.style.left = this.xPos + 'px';
-    vis.style.bottom = this.yPos + 'px';
+    vis.style.transform = `translate(${this.xPos}px, ${this.yPos}px)`;
     vis.className = 'explosion';
     space.appendChild(vis);
   }
@@ -163,8 +158,7 @@ class Bullet {
 
     const visual = this.visual;
     visual.className = 'bullet';
-    visual.style.left = this.xPos + 'px';
-    visual.style.bottom = this.yPos + 'px';
+    visual.style.transform = `translate(${this.xPos}px, ${this.yPos}px)`;
     space.appendChild(visual);
   }
 
@@ -175,8 +169,7 @@ class Bullet {
 
 function createWeapon() {
   weapon.className = 'weapon';
-  weapon.style.left = weaponParams.xPos + 'px';
-  weapon.style.bottom = weaponParams.yPos + 'px';
+  weapon.style.transform = `translate(${weaponParams.xPos}px, ${weaponParams.yPos}px)`;
   space.appendChild(weapon);
   // console.log("created weapon");
 }
@@ -315,23 +308,23 @@ function createUI() {
 }
 
 function moveAsteroids() {
-  for (let i = 0; i < asteroids.length; i++) {
-    if (asteroids[i].yPos <= bottomLine) {
+  asteroids.forEach((asteroid, index) => {
+    if (asteroid.yPos <= bottomLine) {
       //asteroid missed bottom line
       missedCount += 1;
       sounds.missed.cloneNode().play();
       updateCounterDisplays();
-      asteroids[i].destroy();
-      asteroids.splice(i, 1);
+      asteroid.destroy();
+      asteroids.splice(index, 1);
       // console.log("missed asteroids: ", missedCount);
       if (missedCount >= allowMissedCount) {
         gameOver();
       }
     } else if (
-      asteroids[i].xPos + asteroids[i].width > weaponParams.xPos &&
-      asteroids[i].xPos < weaponParams.xPos + weaponParams.width &&
-      asteroids[i].yPos + asteroids[i].height > weaponParams.yPos &&
-      asteroids[i].yPos < weaponParams.yPos + weaponParams.height
+      asteroid.xPos + asteroid.width > weaponParams.xPos &&
+      asteroid.xPos < weaponParams.xPos + weaponParams.width &&
+      asteroid.yPos + asteroid.height > weaponParams.yPos &&
+      asteroid.yPos < weaponParams.yPos + weaponParams.height
     ) {
       //asteroid crashed to weapon
       // console.log("asteroid destroyed weapon");
@@ -341,22 +334,20 @@ function moveAsteroids() {
       gameOver();
     } else {
       //move asteroids
-      asteroids[i].yPos -= asteroids[i].step;
-      asteroids[i].visual.style.bottom = asteroids[i].yPos + 'px';
+      asteroid.yPos -= asteroid.step;
+      asteroid.visual.style.transform = `translateY(${asteroid.yPos}px)`;
     }
-  }
+  });
 }
 
 function moveBullets() {
-  let indexOfBullet = bullets.length - 1;
-  while (indexOfBullet >= 0) {
-    let bullet = bullets[indexOfBullet];
+  bullets.forEach((bullet, i) => {
     bullet.yPos += bulletParams.step;
     if (bullet.yPos >= 600 - bulletParams.height) {
       //reached top of space
       // console.log("bullet reached top of space");
       bullet.destroy();
-      bullets.splice(indexOfBullet, 1);
+      bullets.splice(i, 1);
       if (bullets.length === 0) {
         // if removed bullet was the last
         // console.log("no more bullets to move");
@@ -364,11 +355,9 @@ function moveBullets() {
         return;
       }
     } else {
-      bullet.visual.style.bottom = bullet.yPos + 'px';
+      bullet.visual.style.transform = `translateY(${bullet.yPos}px)`;
       //check if bullet hit any asteroid, if yes remove bullet and asteroid
-      let indexOfAsteroid = asteroids.length - 1;
-      while (indexOfAsteroid >= 0) {
-        let asteroid = asteroids[indexOfAsteroid];
+      asteroids.forEach((asteroid, j) => {
         if (
           bullet.xPos + bulletParams.width > asteroid.xPos &&
           bullet.xPos < asteroid.xPos + asteroid.width &&
@@ -397,8 +386,8 @@ function moveBullets() {
           setTimeout(() => explosion.destroy(), 250);
           bullet.destroy();
           asteroid.destroy();
-          bullets.splice(indexOfBullet, 1);
-          asteroids.splice(indexOfAsteroid, 1);
+          bullets.splice(i, 1);
+          asteroids.splice(j, 1);
           if (bullets.length === 0) {
             //if removed bullet was the last exit function
             // console.log("no more bullets to move");
@@ -406,17 +395,15 @@ function moveBullets() {
             return;
           }
         }
-        indexOfAsteroid -= 1;
-      }
+      });
     }
-    indexOfBullet -= 1;
-  }
+  });
 }
 
 function moveWeapon(direction) {
   const step = {
     left: -5,
-    right: 5,
+    right: 5
   };
   isWeaponMoving = true;
   // console.log("moved");
@@ -424,15 +411,14 @@ function moveWeapon(direction) {
   moveWeaponTimer = setInterval(() => {
     if (
       (direction === 'left' && weaponParams.xPos <= 5) ||
-      (direction === 'right' &&
-        weaponParams.xPos >= spaceWidth - weaponParams.width - 5)
+      (direction === 'right' && weaponParams.xPos >= spaceWidth - weaponParams.width - 5)
     ) {
       isWeaponMoving = false;
       clearInterval(moveWeaponTimer);
       return;
     }
     weaponParams.xPos += step[direction];
-    weapon.style.left = weaponParams.xPos + 'px';
+    weapon.style.transform = `translateX(${weaponParams.xPos}px)`;
   }, 20);
 }
 
@@ -444,16 +430,10 @@ function control(e) {
       return;
     }
   } else {
-    if (
-      (e.key === 'ArrowLeft' || e.currentTarget.id === 'move-left') &&
-      !isWeaponMoving
-    ) {
+    if ((e.key === 'ArrowLeft' || e.currentTarget.id === 'move-left') && !isWeaponMoving) {
       // console.log("want to move left");
       moveWeapon('left');
-    } else if (
-      (e.key === 'ArrowRight' || e.currentTarget.id === 'move-right') &&
-      !isWeaponMoving
-    ) {
+    } else if ((e.key === 'ArrowRight' || e.currentTarget.id === 'move-right') && !isWeaponMoving) {
       // console.log("want to move right");
       moveWeapon('right');
     }
@@ -474,10 +454,7 @@ function fire() {
   }
   // console.log("shot fired");
   sounds.shoot.cloneNode().play();
-  generateNewBullet(
-    weaponParams.xPos + 20 - bulletParams.width / 2,
-    weaponParams.yPos + 40
-  );
+  generateNewBullet(weaponParams.xPos + 20 - bulletParams.width / 2, weaponParams.yPos + 40);
   if (bullets.length === 1) {
     //if first bullet then start move timer
     moveBulletsTimer = setInterval(moveBullets, bulletParams.delay);
@@ -502,7 +479,7 @@ function initSounds() {
     missed: new Audio(sndUrls['missed']),
     levelUp: new Audio(sndUrls['levelUp']),
     gameOver: new Audio(sndUrls['gameOver']),
-    gameStart: new Audio(sndUrls['gameStart']),
+    gameStart: new Audio(sndUrls['gameStart'])
   };
   Object.keys(sounds).forEach((type) => {
     sounds[type].load();
@@ -538,25 +515,22 @@ function gameOver() {
 
   if (!maintenanceMode) {
     console.log('starting update of top scores');
-    updateTopScores().then(() => {
-      console.log(
-        'topscores variable before topscores.setcontent call',
-        topScores
-      );
-      topScoresPanel.setContent(topScoresTemplate(topScores));
-      topScoresPanel.display();
-      missedCount = 0;
-      destroyedCount = 0;
-      startButton.style.display = '';
-    });
+    updateTopScores()
+      .then((result) => {
+        console.log('In gameOver function', { result });
+        console.log('topscores variable before topscores.setcontent call', topScores);
+      })
+      .catch(() => {
+        console.error('Error during updating top scores');
+      });
   } else {
     console.log('In maintenance mode - skipping update of top scores.');
-    topScoresPanel.setContent(topScoresTemplate(topScores));
-    topScoresPanel.display();
-    missedCount = 0;
-    destroyedCount = 0;
-    startButton.style.display = '';
   }
+  topScoresPanel.setContent(topScoresTemplate(topScores));
+  topScoresPanel.display();
+  missedCount = 0;
+  destroyedCount = 0;
+  startButton.style.display = '';
 }
 
 function start() {
@@ -579,10 +553,7 @@ function start() {
   createTouchControls();
   initAsteroids();
   moveAsteroidsTimer = setInterval(moveAsteroids, asteroidsMoveInterval);
-  genNewAsteroidsTimer = setInterval(
-    generateNewAsteroid,
-    levels[level].genNewAsteroidInt
-  );
+  genNewAsteroidsTimer = setInterval(generateNewAsteroid, levels[level].genNewAsteroidInt);
 }
 
 async function initGetTopScores() {
@@ -618,7 +589,7 @@ async function updateTopScores() {
   console.log({ minScore });
   if (topScores.length >= 10 && minScore > destroyedCount) {
     console.log('Score not high enough for top 10');
-    return;
+    return true;
   }
   if (!isLogged) {
     // user not logged in
@@ -637,11 +608,11 @@ async function updateTopScores() {
     if (dbUpdateSuccess === 'rejected') {
       console.log('could not update remote topScore database');
       setStatus(`could not update TOP 10 scores:(`);
-      return;
+      return false;
     }
     console.log('remote user database updated successfully');
     setStatus(`TOP 10 scores updated successfully`);
-    return;
+    return true;
   } else {
     // if user is already logged in
     setStatus('wait, updating TOP 10 scores...');
@@ -649,38 +620,36 @@ async function updateTopScores() {
     if (dbUpdateSuccess === 'rejected') {
       console.log('could not update remote topScore database');
       setStatus(`could not update TOP 10 scores:(`);
-      return;
+      return false;
     }
     setStatus(`TOP 10 scores updated successfully`);
     console.log('remote user database updated successfully');
-    return;
+    return true;
   }
 }
 
-function updateTopScoresDb() {
-  return new Promise(async (resolve, reject) => {
-    const postResp = await fetch(API_URL + '/top-scores', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: loggedUser.username,
-        secret: loggedUser.secret,
-        score: destroyedCount,
-      }),
-    });
-    const postData = await postResp.json();
-    if (postData.status !== 'success') {
-      console.error('cannot update top scores database', postData.message);
-      resolve('rejected');
-    }
-    console.log('top scores updated successfully');
-    topScores = postData.topScores;
-    resolve('done');
+async function updateTopScoresDb() {
+  const postResp = await fetch(API_URL + '/top-scores', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: loggedUser.username,
+      secret: loggedUser.secret,
+      score: destroyedCount
+    })
   });
+  const postData = await postResp.json();
+  if (postData.status !== 'success') {
+    console.error('cannot update top scores database', postData.message);
+    return 'rejected';
+  }
+  console.log('top scores updated successfully');
+  topScores = postData.topScores;
+  return 'done';
 }
 
 function registerNewUser() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     gameSummaryDisplay('off');
     document.removeEventListener('keydown', control);
     document.removeEventListener('keyup', controlStop);
@@ -695,12 +664,9 @@ function registerNewUser() {
       const response = await fetch(API_URL + '/users');
       const users = await response.json();
       console.log(users);
-      const isRegistered = users.filter(
-        (item) => item.username === input.value
-      );
+      const isRegistered = users.filter((item) => item.username === input.value);
       if (isRegistered.length > 0) {
-        let msg =
-          'User with this nickname is already registered! Try different one';
+        let msg = 'User with this nickname is already registered! Try different one';
         console.log(msg);
         statusMsg.textContent = msg;
       } else {
@@ -708,12 +674,12 @@ function registerNewUser() {
         const postResp = await fetch(API_URL + '/users', {
           method: 'post',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: input.value }),
+          body: JSON.stringify({ username: input.value })
         });
         const postData = await postResp.json();
         console.log(postData);
         if (postData.status !== 'success') {
-          console.log(postdata.message);
+          console.log(postData.message);
           statusMsg.textContent = 'something went wrong, try again...';
           setStatus('');
         } else {
@@ -722,13 +688,10 @@ function registerNewUser() {
           isLogged = true;
           loggedUser = {
             username: postData.username,
-            secret: postData.secret,
+            secret: postData.secret
           };
           setStatus(`Hi ${loggedUser.username}, you are now registered.`);
-          localStorage.setItem(
-            'asteroidsLoggedUser',
-            JSON.stringify(loggedUser)
-          );
+          localStorage.setItem('asteroidsLoggedUser', JSON.stringify(loggedUser));
           input.value = '';
           document.addEventListener('keydown', control);
           document.addEventListener('keyup', controlStop);
