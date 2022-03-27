@@ -26,7 +26,7 @@ const asteroidsMoveInterval = 40; // general move delay in ms
 
 const weaponParams = {
   xPos: 180,
-  yPos: 10,
+  yPos: 600 - 10,
   width: 40,
   height: 40
 };
@@ -275,7 +275,7 @@ function generateNewAsteroid() {
   const width = levels[level].width;
   const height = levels[level].height;
   const xPos = getRandBetween(20, spaceWidth - 20 - width);
-  const yPos = 600 - 10 - height;
+  const yPos = 10 + height;
   const step = getRandBetween(levels[level].stepMin, levels[level].stepMax);
   const newAsteroid = new Asteroid(xPos, yPos, width, height, step);
   asteroids.push(newAsteroid);
@@ -309,7 +309,7 @@ function createUI() {
 
 function moveAsteroids() {
   asteroids.forEach((asteroid, index) => {
-    if (asteroid.yPos <= bottomLine) {
+    if (asteroid.yPos >= 600 - bottomLine) {
       //asteroid missed bottom line
       missedCount += 1;
       sounds.missed.cloneNode().play();
@@ -334,16 +334,16 @@ function moveAsteroids() {
       gameOver();
     } else {
       //move asteroids
-      asteroid.yPos -= asteroid.step;
-      asteroid.visual.style.transform = `translateY(${asteroid.yPos}px)`;
+      asteroid.yPos += asteroid.step;
+      asteroid.visual.style.transform = `translate(${asteroid.xPos}px, ${asteroid.yPos}px)`;
     }
   });
 }
 
 function moveBullets() {
   bullets.forEach((bullet, i) => {
-    bullet.yPos += bulletParams.step;
-    if (bullet.yPos >= 600 - bulletParams.height) {
+    bullet.yPos -= bulletParams.step;
+    if (bullet.yPos <= 0 + bulletParams.height) {
       //reached top of space
       // console.log("bullet reached top of space");
       bullet.destroy();
@@ -355,14 +355,14 @@ function moveBullets() {
         return;
       }
     } else {
-      bullet.visual.style.transform = `translateY(${bullet.yPos}px)`;
+      bullet.visual.style.transform = `translate(${bullet.xPos}px, ${bullet.yPos}px)`;
       //check if bullet hit any asteroid, if yes remove bullet and asteroid
       asteroids.forEach((asteroid, j) => {
         if (
           bullet.xPos + bulletParams.width > asteroid.xPos &&
           bullet.xPos < asteroid.xPos + asteroid.width &&
-          bullet.yPos + bulletParams.height > asteroid.yPos &&
-          bullet.yPos < asteroid.yPos + asteroid.height
+          bullet.yPos - bulletParams.height < asteroid.yPos &&
+          bullet.yPos > asteroid.yPos - asteroid.height
         ) {
           // console.log("bullet hit the asteroid");
           sounds.blast.cloneNode().play();
@@ -418,7 +418,7 @@ function moveWeapon(direction) {
       return;
     }
     weaponParams.xPos += step[direction];
-    weapon.style.transform = `translateX(${weaponParams.xPos}px)`;
+    weapon.style.transform = `translate(${weaponParams.xPos}px, ${weaponParams.yPos}px)`;
   }, 20);
 }
 
@@ -454,7 +454,7 @@ function fire() {
   }
   // console.log("shot fired");
   sounds.shoot.cloneNode().play();
-  generateNewBullet(weaponParams.xPos + 20 - bulletParams.width / 2, weaponParams.yPos + 40);
+  generateNewBullet(weaponParams.xPos + 20 - bulletParams.width / 2, weaponParams.yPos - 40);
   if (bullets.length === 1) {
     //if first bullet then start move timer
     moveBulletsTimer = setInterval(moveBullets, bulletParams.delay);
@@ -520,17 +520,24 @@ function gameOver() {
         console.log('In gameOver function', { result });
         console.log('topscores variable before topscores.setcontent call', topScores);
       })
+      .then(() => {
+        missedCount = 0;
+        destroyedCount = 0;
+        topScoresPanel.setContent(topScoresTemplate(topScores));
+        topScoresPanel.display();
+        startButton.style.display = '';
+      })
       .catch(() => {
         console.error('Error during updating top scores');
       });
   } else {
     console.log('In maintenance mode - skipping update of top scores.');
+    missedCount = 0;
+    destroyedCount = 0;
+    topScoresPanel.setContent(topScoresTemplate(topScores));
+    topScoresPanel.display();
+    startButton.style.display = '';
   }
-  topScoresPanel.setContent(topScoresTemplate(topScores));
-  topScoresPanel.display();
-  missedCount = 0;
-  destroyedCount = 0;
-  startButton.style.display = '';
 }
 
 function start() {
@@ -588,6 +595,7 @@ async function updateTopScores() {
   const minScore = topScores[topScores.length - 1].score;
   console.log({ minScore });
   if (topScores.length >= 10 && minScore > destroyedCount) {
+    console.log({ destroyedCount });
     console.log('Score not high enough for top 10');
     return true;
   }
